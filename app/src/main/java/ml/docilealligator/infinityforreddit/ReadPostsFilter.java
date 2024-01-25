@@ -31,9 +31,7 @@ public class ReadPostsFilter {
     }
 
     public List<String> filter(List<String> postIds) {
-        Date start = new Date();
         String username = currentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT);
-        Log.i("ParsePost", "Username: " + username);
         if (username.equals(Account.ANONYMOUS_ACCOUNT)) {
             return postIds;
         }
@@ -51,8 +49,6 @@ public class ReadPostsFilter {
                 readPostIds.add(postId);
             }
         }
-        Log.i("ParsePost", "Username: " + username + ", Duration: " + (new Date().getTime() - start.getTime()));
-
         return readPostIds;
     }
 }

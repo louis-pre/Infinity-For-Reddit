@@ -116,6 +116,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Inject
+    ParsePost mParsePost;
     @State
     ArrayList<Post> posts;
     @State
@@ -140,8 +142,6 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     SortType.Type sortType;
     @State
     SortType.Time sortTime;
-    @State
-    ArrayList<String> readPostList;
     @State
     Post post;
     @State
@@ -559,7 +559,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     Response<String> response = call.execute();
                     if (response.isSuccessful()) {
                         String responseString = response.body();
-                        LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostList);
+                        LinkedHashSet<Post> newPosts = mParsePost.parsePostsSync(responseString, -1, postFilter);
                         if (newPosts == null) {
                             handler.post(() -> {
                                 loadingMorePostsStatus = LoadingMorePostsStatus.NO_MORE_POSTS;
@@ -641,7 +641,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     Response<String> response = historyPosts.execute();
                     if (response.isSuccessful()) {
                         String responseString = response.body();
-                        LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, null);
+                        LinkedHashSet<Post> newPosts = mParsePost.parsePostsSync(responseString, -1, postFilter);
                         if (newPosts == null || newPosts.isEmpty()) {
                             handler.post(() -> {
                                 loadingMorePostsStatus = LoadingMorePostsStatus.NO_MORE_POSTS;
@@ -722,7 +722,6 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             this.postFilter = event.postFilter;
             this.sortType = event.sortType.getType();
             this.sortTime = event.sortType.getTime();
-            this.readPostList = event.readPostList;
 
             if (sectionsPagerAdapter != null) {
                 if (postListPosition > 0)

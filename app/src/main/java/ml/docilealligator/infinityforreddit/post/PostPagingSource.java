@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 import ml.docilealligator.infinityforreddit.SortType;
@@ -53,7 +52,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private final int postType;
     private final SortType sortType;
     private final PostFilter postFilter;
-    private final List<String> readPostList;
+    private final ParsePost mParsePost;
     private String userWhere;
     private String multiRedditPath;
     private final LinkedHashSet<Post> postLinkedHashSet;
@@ -62,7 +61,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     PostPagingSource(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                      SharedPreferences sharedPreferences,
                      SharedPreferences postFeedScrolledPositionSharedPreferences, int postType,
-                     SortType sortType, PostFilter postFilter, List<String> readPostList) {
+                     SortType sortType, PostFilter postFilter, ParsePost parsePost) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.accessToken = accessToken;
@@ -72,14 +71,13 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.postType = postType;
         this.sortType = sortType == null ? new SortType(SortType.Type.BEST) : sortType;
         this.postFilter = postFilter;
-        this.readPostList = readPostList;
+        this.mParsePost = parsePost;
         postLinkedHashSet = new LinkedHashSet<>();
     }
 
     PostPagingSource(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                      SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                     String path, int postType, SortType sortType, PostFilter postFilter,
-                     List<String> readPostList) {
+                     String path, int postType, SortType sortType, PostFilter postFilter, ParsePost parsePost) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.accessToken = accessToken;
@@ -113,14 +111,14 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             this.sortType = sortType;
         }
         this.postFilter = postFilter;
-        this.readPostList = readPostList;
+        this.mParsePost = parsePost;
         postLinkedHashSet = new LinkedHashSet<>();
     }
 
     PostPagingSource(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                      SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
                      String subredditOrUserName, int postType, SortType sortType, PostFilter postFilter,
-                     String where, List<String> readPostList) {
+                     String where, ParsePost parsePost) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.accessToken = accessToken;
@@ -132,14 +130,14 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.sortType = sortType == null ? new SortType(SortType.Type.NEW) : sortType;
         this.postFilter = postFilter;
         userWhere = where;
-        this.readPostList = readPostList;
+        this.mParsePost = parsePost;
         postLinkedHashSet = new LinkedHashSet<>();
     }
 
     PostPagingSource(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                      SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
                      String subredditOrUserName, String query, String trendingSource, int postType,
-                     SortType sortType, PostFilter postFilter, List<String> readPostList) {
+                     SortType sortType, PostFilter postFilter, ParsePost parsePost) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.accessToken = accessToken;
@@ -153,7 +151,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.sortType = sortType == null ? new SortType(SortType.Type.RELEVANCE) : sortType;
         this.postFilter = postFilter;
         postLinkedHashSet = new LinkedHashSet<>();
-        this.readPostList = readPostList;
+        this.mParsePost = parsePost;
     }
 
     @Nullable
@@ -185,7 +183,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     public LoadResult<String, Post> transformData(Response<String> response) {
         if (response.isSuccessful()) {
             String responseString = response.body();
-            LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostList);
+            LinkedHashSet<Post> newPosts = this.mParsePost.parsePostsSync(responseString, -1, postFilter);
             String lastItem = ParsePost.getLastItem(responseString);
             if (newPosts == null) {
                 return new LoadResult.Error<>(new Exception("Error parsing posts"));

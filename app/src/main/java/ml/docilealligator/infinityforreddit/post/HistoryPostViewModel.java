@@ -35,9 +35,11 @@ public class HistoryPostViewModel extends ViewModel {
 
     private final MutableLiveData<PostFilter> postFilterLiveData;
 
+    private final ParsePost parsePost;
+
     public HistoryPostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                                 @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
-                                int postType, PostFilter postFilter) {
+                                int postType, PostFilter postFilter, ParsePost parsePost) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -46,6 +48,7 @@ public class HistoryPostViewModel extends ViewModel {
         this.sharedPreferences = sharedPreferences;
         this.postType = postType;
         this.postFilter = postFilter;
+        this.parsePost = parsePost;
 
         postFilterLiveData = new MutableLiveData<>(postFilter);
 
@@ -63,11 +66,11 @@ public class HistoryPostViewModel extends ViewModel {
         switch (postType) {
             case HistoryPostPagingSource.TYPE_READ_POSTS:
                 historyPostPagingSource = new HistoryPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken, accountName,
-                        sharedPreferences, accountName, postType, postFilter);
+                        sharedPreferences, accountName, postType, postFilter, parsePost);
                 break;
             default:
                 historyPostPagingSource = new HistoryPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken, accountName,
-                        sharedPreferences, accountName, postType, postFilter);
+                        sharedPreferences, accountName, postType, postFilter, parsePost);
                 break;
         }
         return historyPostPagingSource;
@@ -86,10 +89,11 @@ public class HistoryPostViewModel extends ViewModel {
         private final SharedPreferences sharedPreferences;
         private final int postType;
         private final PostFilter postFilter;
+        private final ParsePost parsePost;
 
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences, int postType,
-                       PostFilter postFilter) {
+                       PostFilter postFilter, ParsePost parsePost) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -98,6 +102,7 @@ public class HistoryPostViewModel extends ViewModel {
             this.sharedPreferences = sharedPreferences;
             this.postType = postType;
             this.postFilter = postFilter;
+            this.parsePost = parsePost;
         }
 
         @NonNull
@@ -105,10 +110,10 @@ public class HistoryPostViewModel extends ViewModel {
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             if (postType == HistoryPostPagingSource.TYPE_READ_POSTS) {
                 return (T) new HistoryPostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken, accountName, sharedPreferences,
-                        postType, postFilter);
+                        postType, postFilter, parsePost);
             } else {
                 return (T) new HistoryPostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken, accountName, sharedPreferences,
-                        postType, postFilter);
+                        postType, postFilter, parsePost);
             }
         }
     }

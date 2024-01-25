@@ -18,7 +18,10 @@ import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import ml.docilealligator.infinityforreddit.MediaMetadata;
+import ml.docilealligator.infinityforreddit.ReadPostsFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -28,8 +31,15 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
  */
 
 public class ParsePost {
-    public static LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter, List<String> readPostList) {
-        LinkedHashSet<Post> newPosts = new LinkedHashSet<>();
+
+    private final ReadPostsFilter readPostsFilter;
+
+    @Inject
+    public ParsePost(ReadPostsFilter readPostsFilter) {
+        this.readPostsFilter = readPostsFilter;
+    }
+
+    public LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter) {
         try {
             JSONObject jsonResponse = new JSONObject(response);
             JSONArray allData = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
@@ -42,28 +52,35 @@ public class ParsePost {
                 size = nPosts;
             }
 
-            HashSet<String> readPostHashSet = null;
-            if (readPostList != null) {
-                readPostHashSet = new HashSet<>(readPostList);
-            }
+            List<Post> posts = new ArrayList<>();
+            List<String> postIds = new ArrayList<>();
             for (int i = 0; i < size; i++) {
                 try {
                     if (allData.getJSONObject(i).getString(JSONUtils.KIND_KEY).equals("t3")) {
                         JSONObject data = allData.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
                         Post post = parseBasicData(data);
-                        if (readPostHashSet != null && readPostHashSet.contains(post.getId())) {
-                            post.markAsRead();
-                        }
-                        if (PostFilter.isPostAllowed(post, postFilter)) {
-                            newPosts.add(post);
-                        }
+                        posts.add(post);
+                        postIds.add(post.getId());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-            return newPosts;
+            HashSet<String> readPostIds = new HashSet<>(this.readPostsFilter.filter(postIds));
+
+            LinkedHashSet<Post> filteredPosts = new LinkedHashSet<>();
+            for (int i = 0; i < posts.size(); i++) {
+                Post post = posts.get(i);
+                if (readPostIds.contains(post.getId())) {
+                    post.markAsRead();
+                }
+                if (PostFilter.isPostAllowed(post, postFilter)) {
+                    filteredPosts.add(post);
+                }
+            }
+
+            return filteredPosts;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

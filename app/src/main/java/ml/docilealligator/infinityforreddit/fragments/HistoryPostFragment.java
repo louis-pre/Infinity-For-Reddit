@@ -57,7 +57,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
-import ml.docilealligator.infinityforreddit.FetchPostFilterReadPostsAndConcatenatedSubredditNames;
+import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubredditNames;
 import ml.docilealligator.infinityforreddit.FragmentCommunicator;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -115,6 +115,7 @@ import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPre
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheRightInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.post.HistoryPostPagingSource;
 import ml.docilealligator.infinityforreddit.post.HistoryPostViewModel;
+import ml.docilealligator.infinityforreddit.post.ParsePost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
@@ -175,6 +176,8 @@ public class HistoryPostFragment extends Fragment implements FragmentCommunicato
     ExoCreator mExoCreator;
     @Inject
     Executor mExecutor;
+    @Inject
+    ParsePost mParsePost;
     private RequestManager mGlide;
     private BaseActivity activity;
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
@@ -417,8 +420,8 @@ public class HistoryPostFragment extends Fragment implements FragmentCommunicato
         }
 
         if (postFilter == null) {
-            FetchPostFilterReadPostsAndConcatenatedSubredditNames.fetchPostFilterAndReadPosts(mRedditDataRoomDatabase, mExecutor,
-                    new Handler(), activity.accountName, PostFilterUsage.HISTORY_TYPE, PostFilterUsage.HISTORY_TYPE_USAGE_READ_POSTS, (postFilter, readPostList) -> {
+            FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilter(mRedditDataRoomDatabase, mExecutor,
+                    new Handler(), PostFilterUsage.HISTORY_TYPE, PostFilterUsage.HISTORY_TYPE_USAGE_READ_POSTS, (postFilter) -> {
                         if (activity != null && !activity.isFinishing() && !activity.isDestroyed() && !isDetached()) {
                             this.postFilter = postFilter;
                             postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(activity.accountName + SharedPreferencesUtils.NSFW_BASE, false);
@@ -628,11 +631,11 @@ public class HistoryPostFragment extends Fragment implements FragmentCommunicato
         if (postType == HistoryPostPagingSource.TYPE_READ_POSTS) {
             mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                     activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, activity.accessToken,
-                    activity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter)).get(HistoryPostViewModel.class);
+                    activity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost)).get(HistoryPostViewModel.class);
         } else {
             mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                     activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, activity.accessToken,
-                    activity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter)).get(HistoryPostViewModel.class);
+                    activity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost)).get(HistoryPostViewModel.class);
         }
 
         bindPostViewModel();
@@ -1255,7 +1258,7 @@ public class HistoryPostFragment extends Fragment implements FragmentCommunicato
             EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(historyPostFragmentId,
                     new ArrayList<>(mAdapter.snapshot()), HistoryPostPagingSource.TYPE_READ_POSTS,
                     null, null, null, null,
-                    null, null, null, postFilter, null, null));
+                    null, null, null, postFilter, null));
         }
     }
 

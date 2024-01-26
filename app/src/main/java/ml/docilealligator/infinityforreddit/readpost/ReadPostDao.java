@@ -20,8 +20,8 @@ public interface ReadPostDao {
     @Query("SELECT * FROM read_posts WHERE username = :username AND (:before IS NULL OR time < :before) ORDER BY time DESC LIMIT 25")
     List<ReadPost> getAllReadPosts(String username, Long before);
 
-    @Query("SELECT * FROM read_posts WHERE username = :username")
-    List<ReadPost> getAllReadPosts(String username);
+    @Query("SELECT * FROM read_posts WHERE id IN (:ids)")
+    List<ReadPost> getReadPostByIds(List<String> ids);
 
     @Query("SELECT * FROM read_posts WHERE id = :id LIMIT 1")
     ReadPost getReadPost(String id);

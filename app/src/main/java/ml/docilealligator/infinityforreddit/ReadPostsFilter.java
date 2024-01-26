@@ -1,10 +1,7 @@
 package ml.docilealligator.infinityforreddit;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 
@@ -36,18 +33,11 @@ public class ReadPostsFilter {
             return postIds;
         }
 
-        List<ReadPost> allReadPosts = this.redditDataRoomDatabase.readPostDao().getAllReadPosts(username);
-        HashSet<String> allReadPostIds = new HashSet<>();
-        for (int i = 0; i < allReadPosts.size(); i++) {
-            allReadPostIds.add(allReadPosts.get(i).getId());
-        }
+        List<ReadPost> readPosts = this.redditDataRoomDatabase.readPostDao().getReadPostByIds(postIds);
 
         List<String> readPostIds = new ArrayList<>();
-        for (int i = 0; i < postIds.size(); i++) {
-            String postId = postIds.get(i);
-            if (allReadPostIds.contains(postId)) {
-                readPostIds.add(postId);
-            }
+        for (int i = 0; i < readPosts.size(); i++) {
+            readPostIds.add(readPosts.get(i).getId());
         }
         return readPostIds;
     }

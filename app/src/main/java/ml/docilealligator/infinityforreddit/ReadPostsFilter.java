@@ -33,7 +33,7 @@ public class ReadPostsFilter {
             return postIds;
         }
 
-        List<ReadPost> readPosts = this.redditDataRoomDatabase.readPostDao().getReadPostByIds(postIds);
+        List<ReadPost> readPosts = this.redditDataRoomDatabase.readPostDao().getReadPostByIds(username, postIds);
 
         List<String> readPostIds = new ArrayList<>();
         for (int i = 0; i < readPosts.size(); i++) {

@@ -52,7 +52,7 @@ public class HistoryPostViewModel extends ViewModel {
 
         postFilterLiveData = new MutableLiveData<>(postFilter);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(25, 4, false, 10), this::returnPagingSource);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(20, 10, false, 10), this::returnPagingSource);
 
         posts = Transformations.switchMap(postFilterLiveData, postFilterValue -> PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this)));
     }

@@ -18,8 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -47,7 +45,7 @@ import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.readpost.InsertReadPost;
+import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditViewModel;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
@@ -85,7 +83,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
-    Executor mExecutor;
+    ReadPosts mReadPosts;
     public SubredditViewModel mSubredditViewModel;
     private String name;
     private String userWhere;
@@ -459,7 +457,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
 
     @Override
     public void markPostAsRead(Post post) {
-        InsertReadPost.insertReadPost(mRedditDataRoomDatabase, mExecutor, accountName, post.getId());
+        mReadPosts.insertAsync(post.getId());
     }
 
     @Override

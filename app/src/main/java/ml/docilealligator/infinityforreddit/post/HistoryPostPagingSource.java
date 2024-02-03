@@ -1,7 +1,5 @@
 package ml.docilealligator.infinityforreddit.post;
 
-import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.paging.ListenableFuturePagingSource;
@@ -16,11 +14,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Call;
 import retrofit2.HttpException;
@@ -32,28 +30,25 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
 
     private final Retrofit retrofit;
     private final Executor executor;
-    private final RedditDataRoomDatabase redditDataRoomDatabase;
     private final String accessToken;
     private final String accountName;
-    private final SharedPreferences sharedPreferences;
-    private final String username;
     private final int postType;
     private final PostFilter postFilter;
     private final ParsePost parsePost;
+    private final ReadPostRepository readPostRepository;
 
-    public HistoryPostPagingSource(Retrofit retrofit, Executor executor, RedditDataRoomDatabase redditDataRoomDatabase,
-                                   @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
-                                   String username, int postType, PostFilter postFilter, ParsePost parsePost) {
+    public HistoryPostPagingSource(Retrofit retrofit, Executor executor,
+                                   @Nullable String accessToken, @NonNull String accountName,
+                                   int postType, PostFilter postFilter, ParsePost parsePost,
+                                   ReadPostRepository readPostRepository) {
         this.retrofit = retrofit;
         this.executor = executor;
-        this.redditDataRoomDatabase = redditDataRoomDatabase;
         this.accessToken = accessToken;
         this.accountName = accountName;
-        this.sharedPreferences = sharedPreferences;
-        this.username = username;
         this.postType = postType;
         this.postFilter = postFilter;
         this.parsePost = parsePost;
+        this.readPostRepository = readPostRepository;
     }
 
     @Nullable
@@ -66,9 +61,9 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     @Override
     public ListenableFuture<LoadResult<String, Post>> loadFuture(@NonNull LoadParams<String> loadParams) {
         if (postType == TYPE_READ_POSTS) {
-            return loadHomePosts(loadParams, redditDataRoomDatabase);
+            return loadHomePosts(loadParams);
         } else {
-            return loadHomePosts(loadParams, redditDataRoomDatabase);
+            return loadHomePosts(loadParams);
         }
     }
 
@@ -112,9 +107,9 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
         }
     }
 
-    private ListenableFuture<LoadResult<String, Post>> loadHomePosts(@NonNull LoadParams<String> loadParams, RedditDataRoomDatabase redditDataRoomDatabase) {
+    private ListenableFuture<LoadResult<String, Post>> loadHomePosts(@NonNull LoadParams<String> loadParams) {
         Long before = loadParams.getKey() != null ? Long.parseLong(loadParams.getKey()) : null;
-        ListenableFuture<List<ReadPost>> readPosts = redditDataRoomDatabase.readPostDao().getAllReadPostsListenableFuture(username, before);
+        ListenableFuture<List<ReadPost>> readPosts = readPostRepository.getAllListenableFuture(before);
 
         ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(readPosts, this::transformData, executor);
 

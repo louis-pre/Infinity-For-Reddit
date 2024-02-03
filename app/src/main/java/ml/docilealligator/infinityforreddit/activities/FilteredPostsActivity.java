@@ -45,7 +45,7 @@ import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditViewModel;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
@@ -83,7 +83,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
-    ReadPosts mReadPosts;
+    ReadPostRepository mReadPostRepository;
     public SubredditViewModel mSubredditViewModel;
     private String name;
     private String userWhere;
@@ -457,7 +457,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
 
     @Override
     public void markPostAsRead(Post post) {
-        mReadPosts.insertAsync(post.getId());
+        mReadPostRepository.insertAsync(post.getId());
     }
 
     @Override

@@ -119,6 +119,7 @@ import ml.docilealligator.infinityforreddit.post.ParsePost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
@@ -178,6 +179,8 @@ public class HistoryPostFragment extends Fragment implements FragmentCommunicato
     Executor mExecutor;
     @Inject
     ParsePost mParsePost;
+    @Inject
+    ReadPostRepository mReadPostRepository;
     private RequestManager mGlide;
     private BaseActivity activity;
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
@@ -630,12 +633,12 @@ public class HistoryPostFragment extends Fragment implements FragmentCommunicato
     private void initializeAndBindPostViewModel() {
         if (postType == HistoryPostPagingSource.TYPE_READ_POSTS) {
             mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
-                    activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, activity.accessToken,
-                    activity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost)).get(HistoryPostViewModel.class);
+                    activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, activity.accessToken,
+                    activity.accountName, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost, mReadPostRepository)).get(HistoryPostViewModel.class);
         } else {
             mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
-                    activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, activity.accessToken,
-                    activity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost)).get(HistoryPostViewModel.class);
+                    activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, activity.accessToken,
+                    activity.accountName, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost, mReadPostRepository)).get(HistoryPostViewModel.class);
         }
 
         bindPostViewModel();

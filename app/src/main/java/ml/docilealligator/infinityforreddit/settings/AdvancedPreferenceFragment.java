@@ -28,7 +28,6 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.asynctasks.BackupSettings;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllPostLayouts;
-import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllReadPosts;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllSortTypes;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllSubreddits;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllThemes;
@@ -36,6 +35,7 @@ import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllUsers;
 import ml.docilealligator.infinityforreddit.asynctasks.RestoreSettings;
 import ml.docilealligator.infinityforreddit.customviews.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 /**
@@ -50,6 +50,8 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
+    @Inject
+    ReadPostRepository mReadPostRepository;
     @Inject
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
@@ -199,8 +201,7 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                 new MaterialAlertDialogBuilder(activity, R.style.MaterialAlertDialogTheme)
                         .setTitle(R.string.are_you_sure)
                         .setPositiveButton(R.string.yes, (dialogInterface, i)
-                                -> DeleteAllReadPosts.deleteAllReadPosts(executor, new Handler(),
-                                mRedditDataRoomDatabase, () -> {
+                                -> mReadPostRepository.deleteAllAsync(new Handler(), () -> {
                             Toast.makeText(activity, R.string.delete_all_read_posts_success, Toast.LENGTH_SHORT).show();
                         }))
                         .setNegativeButton(R.string.no, null)

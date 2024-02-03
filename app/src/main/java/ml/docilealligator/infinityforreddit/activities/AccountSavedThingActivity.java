@@ -40,7 +40,7 @@ import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
-import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
@@ -65,7 +65,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
-    ReadPosts mReadPosts;
+    ReadPostRepository mReadPostRepository;
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private PostLayoutBottomSheetFragment postLayoutBottomSheetFragment;
@@ -250,7 +250,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
 
     @Override
     public void markPostAsRead(Post post) {
-        mReadPosts.insertAsync(post.getId());
+        mReadPostRepository.insertAsync(post.getId());
     }
 
     private class SectionsPagerAdapter extends FragmentStateAdapter {

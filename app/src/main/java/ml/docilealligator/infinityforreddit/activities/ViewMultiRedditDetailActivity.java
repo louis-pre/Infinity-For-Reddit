@@ -65,7 +65,7 @@ import ml.docilealligator.infinityforreddit.multireddit.DeleteMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
-import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -117,7 +117,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     @Inject
     Executor mExecutor;
     @Inject
-    ReadPosts mReadPosts;
+    ReadPostRepository mReadPostRepository;
     private String multiPath;
     private Fragment mFragment;
     private int fabOption;
@@ -850,7 +850,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
     @Override
     public void markPostAsRead(Post post) {
-        mReadPosts.insertAsync(post.getId());
+        mReadPostRepository.insertAsync(post.getId());
     }
 
     @Override

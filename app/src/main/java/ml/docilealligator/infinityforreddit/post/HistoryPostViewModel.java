@@ -1,7 +1,5 @@
 package ml.docilealligator.infinityforreddit.post;
 
-import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -17,19 +15,18 @@ import androidx.paging.PagingLiveData;
 
 import java.util.concurrent.Executor;
 
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import retrofit2.Retrofit;
 
 public class HistoryPostViewModel extends ViewModel {
     private final Executor executor;
     private final Retrofit retrofit;
-    private final RedditDataRoomDatabase redditDataRoomDatabase;
     private final String accessToken;
     private final String accountName;
-    private final SharedPreferences sharedPreferences;
     private final int postType;
     private final PostFilter postFilter;
+    private final ReadPostRepository readPostRepository;
 
     private final LiveData<PagingData<Post>> posts;
 
@@ -37,18 +34,17 @@ public class HistoryPostViewModel extends ViewModel {
 
     private final ParsePost parsePost;
 
-    public HistoryPostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
-                                @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
-                                int postType, PostFilter postFilter, ParsePost parsePost) {
+    public HistoryPostViewModel(Executor executor, Retrofit retrofit, @Nullable String accessToken,
+                                @NonNull String accountName, int postType, PostFilter postFilter,
+                                ParsePost parsePost, ReadPostRepository readPostRepository) {
         this.executor = executor;
         this.retrofit = retrofit;
-        this.redditDataRoomDatabase = redditDataRoomDatabase;
         this.accessToken = accessToken;
         this.accountName = accountName;
-        this.sharedPreferences = sharedPreferences;
         this.postType = postType;
         this.postFilter = postFilter;
         this.parsePost = parsePost;
+        this.readPostRepository = readPostRepository;
 
         postFilterLiveData = new MutableLiveData<>(postFilter);
 
@@ -65,12 +61,12 @@ public class HistoryPostViewModel extends ViewModel {
         HistoryPostPagingSource historyPostPagingSource;
         switch (postType) {
             case HistoryPostPagingSource.TYPE_READ_POSTS:
-                historyPostPagingSource = new HistoryPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken, accountName,
-                        sharedPreferences, accountName, postType, postFilter, parsePost);
+                historyPostPagingSource = new HistoryPostPagingSource(retrofit, executor,
+                        accessToken, accountName, postType, postFilter, parsePost, readPostRepository);
                 break;
             default:
-                historyPostPagingSource = new HistoryPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken, accountName,
-                        sharedPreferences, accountName, postType, postFilter, parsePost);
+                historyPostPagingSource = new HistoryPostPagingSource(retrofit, executor,
+                        accessToken, accountName, postType, postFilter, parsePost, readPostRepository);
                 break;
         }
         return historyPostPagingSource;
@@ -83,37 +79,35 @@ public class HistoryPostViewModel extends ViewModel {
     public static class Factory extends ViewModelProvider.NewInstanceFactory {
         private final Executor executor;
         private final Retrofit retrofit;
-        private final RedditDataRoomDatabase redditDataRoomDatabase;
         private final String accessToken;
         private final String accountName;
-        private final SharedPreferences sharedPreferences;
         private final int postType;
         private final PostFilter postFilter;
         private final ParsePost parsePost;
+        private final ReadPostRepository readPostRepository;
 
-        public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
-                       @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences, int postType,
-                       PostFilter postFilter, ParsePost parsePost) {
+        public Factory(Executor executor, Retrofit retrofit, @Nullable String accessToken,
+                       @NonNull String accountName, int postType, PostFilter postFilter,
+                       ParsePost parsePost, ReadPostRepository readPostRepository) {
             this.executor = executor;
             this.retrofit = retrofit;
-            this.redditDataRoomDatabase = redditDataRoomDatabase;
             this.accessToken = accessToken;
             this.accountName = accountName;
-            this.sharedPreferences = sharedPreferences;
             this.postType = postType;
             this.postFilter = postFilter;
             this.parsePost = parsePost;
+            this.readPostRepository = readPostRepository;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             if (postType == HistoryPostPagingSource.TYPE_READ_POSTS) {
-                return (T) new HistoryPostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken, accountName, sharedPreferences,
-                        postType, postFilter, parsePost);
+                return (T) new HistoryPostViewModel(executor, retrofit, accessToken, accountName,
+                        postType, postFilter, parsePost, readPostRepository);
             } else {
-                return (T) new HistoryPostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken, accountName, sharedPreferences,
-                        postType, postFilter, parsePost);
+                return (T) new HistoryPostViewModel(executor, retrofit, accessToken, accountName,
+                        postType, postFilter, parsePost, readPostRepository);
             }
         }
     }

@@ -109,7 +109,7 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditViewModel;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
-import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
@@ -184,7 +184,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @Inject
     Executor mExecutor;
     @Inject
-    ReadPosts mReadPosts;
+    ReadPostRepository mReadPostRepository;
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private NavigationDrawerRecyclerViewMergedAdapter adapter;
@@ -1498,7 +1498,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     @Override
     public void markPostAsRead(Post post) {
-        mReadPosts.insertAsync(post.getId());
+        mReadPostRepository.insertAsync(post.getId());
     }
 
     public void doNotShowRedditAPIInfoAgain() {

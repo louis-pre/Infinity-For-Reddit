@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import ml.docilealligator.infinityforreddit.MediaMetadata;
-import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -32,11 +32,11 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class ParsePost {
 
-    private final ReadPosts readPosts;
+    private final ReadPostRepository mReadPostRepository;
 
     @Inject
-    public ParsePost(ReadPosts readPosts) {
-        this.readPosts = readPosts;
+    public ParsePost(ReadPostRepository readPostRepository) {
+        mReadPostRepository = readPostRepository;
     }
 
     public LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter) {
@@ -67,7 +67,7 @@ public class ParsePost {
                 }
             }
 
-            HashSet<String> readPostIds = new HashSet<>(this.readPosts.filterOutUnread(postIds));
+            HashSet<String> readPostIds = new HashSet<>(mReadPostRepository.filterOutUnread(postIds));
 
             LinkedHashSet<Post> filteredPosts = new LinkedHashSet<>();
             for (int i = 0; i < posts.size(); i++) {

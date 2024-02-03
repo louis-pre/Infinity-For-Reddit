@@ -102,7 +102,7 @@ import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
-import ml.docilealligator.infinityforreddit.readpost.ReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.subreddit.FetchSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
@@ -165,7 +165,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Inject
     Executor mExecutor;
     @Inject
-    ReadPosts mReadPosts;
+    ReadPostRepository mReadPostRepository;
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private NavigationWrapper navigationWrapper;
@@ -1517,7 +1517,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
     @Override
     public void markPostAsRead(Post post) {
-        mReadPosts.insertAsync(post.getId());
+        mReadPostRepository.insertAsync(post.getId());
     }
 
     @Override

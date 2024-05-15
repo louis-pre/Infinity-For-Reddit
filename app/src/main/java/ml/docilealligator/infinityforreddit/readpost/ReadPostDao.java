@@ -23,9 +23,9 @@ public interface ReadPostDao {
     @Query("SELECT * FROM read_posts WHERE username = :username AND id IN (:ids)")
     List<ReadPost> getReadPostByIds(String username, List<String> ids);
 
-    @Query("SELECT * FROM read_posts WHERE id = :id LIMIT 1")
-    ReadPost getReadPost(String id);
+    @Query("SELECT * FROM read_posts WHERE username = :username AND id = :id LIMIT 1")
+    ReadPost getReadPost(String username, String id);
 
-    @Query("DELETE FROM read_posts")
-    void deleteAllReadPosts();
+    @Query("DELETE FROM read_posts WHERE username = :username")
+    void deleteAllReadPosts(String username);
 }

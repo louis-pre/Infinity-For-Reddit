@@ -35,7 +35,11 @@ public class ReadPostRepository {
     }
 
     public ReadPost getOne(String id) {
-        return mReadPostDao.getReadPost(id);
+        String username = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT);
+        if (username.equals(Account.ANONYMOUS_ACCOUNT)) {
+            return null;
+        }
+        return mReadPostDao.getReadPost(username, id);
     }
 
     public List<ReadPost> getAll() {
@@ -87,8 +91,13 @@ public class ReadPostRepository {
     }
 
     public void deleteAllAsync(Handler handler, DeleteAllReadPostsAsyncTaskListener deleteAllReadPostsAsyncTaskListener) {
+        String username = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT);
+        if (username.equals(Account.ANONYMOUS_ACCOUNT)) {
+            return;
+        }
+
         mExecutor.execute(() -> {
-            mReadPostDao.deleteAllReadPosts();
+            mReadPostDao.deleteAllReadPosts(username);
             handler.post(deleteAllReadPostsAsyncTaskListener::success);
         });
     }

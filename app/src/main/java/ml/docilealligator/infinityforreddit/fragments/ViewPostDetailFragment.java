@@ -56,6 +56,7 @@ import com.livefront.bridge.Bridge;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -2130,6 +2131,11 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
     @Override
     public void toggleMod(@NonNull Post post, int position) {
         viewPostDetailFragmentViewModel.toggleMod(post, position);
+    }
+
+    @Override
+    public void toggleNotification(@NotNull Post post, int position) {
+        viewPostDetailFragmentViewModel.toggleNotification(post, position);
     }
 
     @Override

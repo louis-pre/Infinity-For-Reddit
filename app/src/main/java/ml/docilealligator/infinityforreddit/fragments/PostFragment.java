@@ -33,6 +33,7 @@ import androidx.transition.TransitionManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -1456,5 +1457,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Override
     public void toggleMod(@NonNull Post post, int position) {
         mPostViewModel.toggleMod(post, position);
+    }
+
+    @Override
+    public void toggleNotification(@NotNull Post post, int position) {
+        mPostViewModel.toggleNotification(post, position);
     }
 }

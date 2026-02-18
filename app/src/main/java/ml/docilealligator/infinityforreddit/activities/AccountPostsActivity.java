@@ -102,7 +102,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
                                 allInsets.right,
                                 BaseActivity.IGNORE_MARGIN);
 
-                        binding.accountPostsFrameLayout.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
+                        binding.accountPostsFrameLayout.setPadding(allInsets.left, 0, allInsets.right, 0);
 
                         return insets;
                     }

@@ -1,0 +1,142 @@
+package ml.docilealligator.infinityforreddit.synccit;
+
+import android.util.Log;
+
+
+import androidx.annotation.NonNull;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import ml.docilealligator.infinityforreddit.apis.ReadditAPI;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
+@Singleton
+public class Readdit {
+
+    private final ReadditAPI mReadditAPI;
+
+    @Inject
+    public Readdit(@Named("base") Retrofit retrofit) {
+        mReadditAPI = retrofit.newBuilder()
+                .baseUrl(APIUtils.READDIT_API_BASE_URI)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(ReadditAPI.class);
+    }
+
+    public void insertRead(String postId) {
+        insertReads(Collections.singletonList(postId));
+    }
+
+    public void insertReads(List<String> postIds) {
+        List<ReadditAPI.Read> insertReads = new ArrayList<>();
+
+        for (int i = 0; i < postIds.size(); i++) {
+            insertReads.add(new ReadditAPI.Read(postIds.get(i)));
+        }
+
+        String header = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE5NzExMTYxOTYsImlhdCI6MTcwODIwMDk5Niwic3ViIjoiZGphZ2F0YWhlbCJ9.xKnXMU0Jk28Gra9cbtsJ7_6NFtVceZEbo5bm3lF_M1I";
+        Call<String> result = mReadditAPI.insertReads(header, insertReads);
+
+        try {
+            Response<String> response = result.execute();
+            if (!response.isSuccessful()) {
+                Log.e("Readdit", "Failed call to Readdit API with code: " + response.code());
+                return;
+            }
+            Log.i("Readdit", "Inserted " + postIds);
+        } catch (IOException e) {
+            Log.e("Readdit", "Could not call Readdit API " + e.getMessage());
+        }
+    }
+
+//    public ListenableFuture<List<String>> getReadIdsFuture(List<String> postIds) {
+//        List<String> readIds = new ArrayList<>();
+//        String postIdsString = String.join(",", postIds);
+//        String header = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE5NzExMTYxOTYsImlhdCI6MTcwODIwMDk5Niwic3ViIjoiZGphZ2F0YWhlbCJ9.xKnXMU0Jk28Gra9cbtsJ7_6NFtVceZEbo5bm3lF_M1I";
+//        Call<List<ReadditAPI.Read>> call = mReadditAPI.getReads(header, postIdsString, "");
+//
+//        SettableFuture<List<ReadditAPI.Read>> future = SettableFuture.create();
+//        call.enqueue(new retrofit2.Callback<>() {
+//            @Override
+//            public void onResponse(@NonNull Call<List<ReadditAPI.Read>> call, @NonNull retrofit2.Response<List<ReadditAPI.Read>> response) {
+//                if (response.isSuccessful()) {
+//                    future.set(response.body());
+//                } else {
+//                    future.setException(new RuntimeException("Failed call to Readdit API with code: " + response.code()));
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<List<ReadditAPI.Read>> call, @NonNull Throwable t) {
+//                future.setException(t);
+//            }
+//        });
+//        return readIds;
+//    }
+
+    public List<String> getReadIds(List<String> postIds) {
+        return getReadIds(postIds, null);
+    }
+
+    public List<String> getReadIds(List<String> postIds, Long readAtAfter) {
+        List<String> readIds = new ArrayList<>();
+        String postIdsString = String.join(",", postIds);
+        String header = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE5NzExMTYxOTYsImlhdCI6MTcwODIwMDk5Niwic3ViIjoiZGphZ2F0YWhlbCJ9.xKnXMU0Jk28Gra9cbtsJ7_6NFtVceZEbo5bm3lF_M1I";
+        Call<List<ReadditAPI.Read>> resultCall = mReadditAPI.getReads(header, postIdsString, readAtAfter != null ? convertLongToNaiveDateTimeString(readAtAfter) : null);
+
+        try {
+            Response<List<ReadditAPI.Read>> response = resultCall.execute();
+            if (!response.isSuccessful()) {
+                Log.e("Readdit", "Failed call to Readdit API with code: " + response.code());
+                return readIds;
+            }
+
+            List<ReadditAPI.Read> reads = response.body();
+            reads = reads != null ? reads : new ArrayList<>();
+
+            for (int i = 0; i < reads.size(); i++) {
+                readIds.add(reads.get(i).getRedditId());
+            }
+            Log.i("Readdit", "Found: " + readIds);
+            return readIds;
+        } catch (IOException e) {
+            Log.e("Readdit", "Could not call Readdit API " + e.getMessage());
+            return readIds;
+        }
+    }
+
+
+    public String convertLongToNaiveDateTimeString(Long timestamp) {
+        // Convert the Long timestamp to a Date object
+        Date date = new Date(timestamp);
+
+        // Create a SimpleDateFormat object to format the date
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        // Format the Date object to a string
+        return formatter.format(date);
+    }
+}

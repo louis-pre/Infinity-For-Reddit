@@ -17,8 +17,17 @@ android {
             }
         }
     }
+    signingConfigs {
+        release {
+            storeFile file("Infinity.jks")
+            storePassword "Infinity"
+            keyAlias "Infinity"
+            keyPassword "Infinity"
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -101,6 +110,7 @@ dependencies {
     def retrofitVersion = '2.11.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 

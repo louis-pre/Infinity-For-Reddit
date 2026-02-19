@@ -620,11 +620,12 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             });
         } else {
             mExecutor.execute(() -> {
-                long lastItem = 0;
+                List<ReadPost> readPosts = new ArrayList<>();
                 if (!posts.isEmpty()) {
-                    lastItem = mReadPostRepository.getOne(posts.get(posts.size() - 1).getId()).getTime();
+                    String lastVisiblePostId = posts.get(posts.size() - 1).getId();
+                    readPosts = mReadPostRepository.getAllBeforeReference(lastVisiblePostId);
                 }
-                List<ReadPost> readPosts = mReadPostRepository.getAll(lastItem);
+
                 StringBuilder ids = new StringBuilder();
                 for (ReadPost readPost : readPosts) {
                     ids.append("t3_").append(readPost.getId()).append(",");

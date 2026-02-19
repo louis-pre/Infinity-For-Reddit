@@ -25,10 +25,11 @@ public class APIUtils {
     public static final String REVEDDIT_API_BASE_URI = "https://api.reveddit.com/";
     public static final String STREAMABLE_API_BASE_URI = "https://api.streamable.com";
     public static final String ONLINE_CUSTOM_THEMES_API_BASE_URI = "http://127.0.0.1";
+    public static final String READDIT_API_BASE_URI = "https://readdit.louispre.com/";
 
     public static final String CLIENT_ID_KEY = "client_id";
     public static final String CLIENT_SECRET_KEY = "client_secret";
-    public static final String CLIENT_ID = "NOe2iKrPPzwscA";
+    public static final String CLIENT_ID = "9AaYQfbiYfgOZSYIhrUhIQ";
     public static final String IMGUR_CLIENT_ID = "Client-ID cc671794e0ab397";
     public static final String REDGIFS_CLIENT_ID = "1828d0bcc93-15ac-bde6-0005-d2ecbe8daab3";
     public static final String REDGIFS_CLIENT_SECRET = "TJBlw7jRXW65NAGgFBtgZHu97WlzRXHYybK81sZ9dLM=";
@@ -37,7 +38,7 @@ public class APIUtils {
     public static final String STATE_KEY = "state";
     public static final String STATE = "23ro8xlxvzp4asqd";
     public static final String REDIRECT_URI_KEY = "redirect_uri";
-    public static final String REDIRECT_URI = "infinity://localhost";
+    public static final String REDIRECT_URI = "http://127.0.0.1";
     public static final String DURATION_KEY = "duration";
     public static final String DURATION = "permanent";
     public static final String SCOPE_KEY = "scope";
@@ -47,7 +48,8 @@ public class APIUtils {
     public static final String AUTHORIZATION_KEY = "Authorization";
     public static final String AUTHORIZATION_BASE = "bearer ";
     public static final String USER_AGENT_KEY = "User-Agent";
-    public static final String USER_AGENT = "android:ml.docilealligator.infinityforreddit:" + BuildConfig.VERSION_NAME + " (by /u/Hostilenemy)";
+
+    public static final String USER_AGENT = "personal-app:0.0.1 (by /u/Djagatahel)";
 
     public static final String GRANT_TYPE_KEY = "grant_type";
     public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";

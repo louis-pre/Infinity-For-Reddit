@@ -74,6 +74,7 @@ import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
@@ -122,6 +123,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     Executor mExecutor;
     @Inject
     ParsePost mParsePost;
+    @Inject
+    ReadPostRepository mReadPostRepository;
     @State
     ArrayList<Post> posts;
     @State
@@ -698,11 +701,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             });
         } else {
             mExecutor.execute(() -> {
-                long lastItem = 0;
-                if (!posts.isEmpty()) {
-                    lastItem = mRedditDataRoomDatabase.readPostDao().getReadPost(posts.get(posts.size() - 1).getId()).getTime();
-                }
-                List<ReadPost> readPosts = mRedditDataRoomDatabase.readPostDao().getAllReadPosts(accountName, lastItem);
+                String lastVisiblePostId = posts.isEmpty() ? null : posts.get(posts.size() - 1).getId();
+                List<ReadPost> readPosts = mReadPostRepository.getAllBeforeReference(lastVisiblePostId);
                 StringBuilder ids = new StringBuilder();
                 for (ReadPost readPost : readPosts) {
                     ids.append("t3_").append(readPost.getId()).append(",");

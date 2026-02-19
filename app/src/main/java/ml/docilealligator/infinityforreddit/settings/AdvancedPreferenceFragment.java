@@ -29,7 +29,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.asynctasks.BackupSettings;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllPostLayouts;
-import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllReadPosts;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllSortTypes;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllSubreddits;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllThemes;
@@ -87,6 +87,8 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     SharedPreferences postHistorySharedPreferences;
     @Inject
     Executor executor;
+    @Inject
+    ReadPostRepository mReadPostRepository;
     private Handler handler;
 
     @Override
@@ -210,11 +212,9 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
             deleteReadPostsPreference.setOnPreferenceClickListener(preference -> {
                 new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
                         .setTitle(R.string.are_you_sure)
-                        .setPositiveButton(R.string.yes, (dialogInterface, i)
-                                -> DeleteAllReadPosts.deleteAllReadPosts(executor, handler,
-                                mRedditDataRoomDatabase, () -> {
-                            Toast.makeText(mActivity, R.string.delete_all_read_posts_success, Toast.LENGTH_SHORT).show();
-                        }))
+                        .setPositiveButton(R.string.yes, (dialogInterface, i) ->
+                            mReadPostRepository.deleteAllAsync(handler, () ->
+                                Toast.makeText(mActivity, R.string.delete_all_read_posts_success, Toast.LENGTH_SHORT).show()))
                         .setNegativeButton(R.string.no, null)
                         .show();
                 return true;

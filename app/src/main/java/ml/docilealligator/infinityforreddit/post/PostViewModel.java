@@ -83,7 +83,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(20, 10, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -124,7 +124,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(20, 10, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -167,7 +167,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(20, 10, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -211,7 +211,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(20, 10, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -256,7 +256,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(20, 10, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(

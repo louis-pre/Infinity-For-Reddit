@@ -239,7 +239,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             afterKey = loadParams.getKey();
         }
         bestPost = api.getBestPostsListenableFuture(sortType.getType(), sortType.getTime(), afterKey,
-                APIUtils.getOAuthHeader(accessToken));
+                loadParams.getLoadSize(), APIUtils.getOAuthHeader(accessToken));
 
         ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(bestPost, this::transformData, executor);
 
@@ -276,10 +276,11 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         ListenableFuture<Response<String>> userPosts;
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             userPosts = api.getUserPostsListenableFuture(subredditOrUserName, loadParams.getKey(), sortType.getType(),
-                    sortType.getTime());
+                    sortType.getTime(), loadParams.getLoadSize());
         } else {
             userPosts = api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken,
-                    subredditOrUserName, userWhere, loadParams.getKey(), USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null);
+                    subredditOrUserName, userWhere, loadParams.getKey(), USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null,
+                    loadParams.getLoadSize());
         }
 
         ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(userPosts, this::transformData, executor);
@@ -297,19 +298,19 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         if (subredditOrUserName == null) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 searchPosts = api.searchPostsListenableFuture(query, loadParams.getKey(), sortType.getType(), sortType.getTime(),
-                        trendingSource);
+                        trendingSource, loadParams.getLoadSize());
             } else {
                 searchPosts = api.searchPostsOauthListenableFuture(query, loadParams.getKey(), sortType.getType(),
-                        sortType.getTime(), trendingSource, APIUtils.getOAuthHeader(accessToken));
+                        sortType.getTime(), trendingSource, loadParams.getLoadSize(), APIUtils.getOAuthHeader(accessToken));
             }
         } else {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 searchPosts = api.searchPostsInSpecificSubredditListenableFuture(subredditOrUserName, query,
-                        sortType.getType(), sortType.getTime(), loadParams.getKey());
+                        sortType.getType(), sortType.getTime(), loadParams.getKey(), loadParams.getLoadSize());
             } else {
                 searchPosts = api.searchPostsInSpecificSubredditOauthListenableFuture(subredditOrUserName, query,
                         sortType.getType(), sortType.getTime(), loadParams.getKey(),
-                        APIUtils.getOAuthHeader(accessToken));
+                        loadParams.getLoadSize(), APIUtils.getOAuthHeader(accessToken));
             }
         }
 
@@ -328,17 +329,18 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             if (query != null && !query.isEmpty()) {
                 multiRedditPosts = api.searchMultiRedditPostsListenableFuture(multiRedditPath, query, loadParams.getKey(),
-                        sortType.getType(), sortType.getTime());
+                        sortType.getType(), sortType.getTime(), loadParams.getLoadSize());
             } else {
-                multiRedditPosts = api.getMultiRedditPostsListenableFuture(multiRedditPath, sortType.getType(), loadParams.getKey(), sortType.getTime());
+                multiRedditPosts = api.getMultiRedditPostsListenableFuture(multiRedditPath, sortType.getType(), loadParams.getKey(), sortType.getTime(),
+                        loadParams.getLoadSize());
             }
         } else {
             if (query != null && !query.isEmpty()) {
                 multiRedditPosts = api.searchMultiRedditPostsOauthListenableFuture(multiRedditPath, query, loadParams.getKey(),
-                        sortType.getType(), sortType.getTime(), APIUtils.getOAuthHeader(accessToken));
+                        sortType.getType(), sortType.getTime(), loadParams.getLoadSize(), APIUtils.getOAuthHeader(accessToken));
             } else {
                 multiRedditPosts = api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(), loadParams.getKey(),
-                        sortType.getTime(), APIUtils.getOAuthHeader(accessToken));
+                        sortType.getTime(), loadParams.getLoadSize(), APIUtils.getOAuthHeader(accessToken));
             }
         }
 

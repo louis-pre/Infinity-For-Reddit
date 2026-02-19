@@ -75,8 +75,7 @@ import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.post.PostViewModel;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
-import ml.docilealligator.infinityforreddit.readpost.ReadPostsList;
-import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
+import ml.docilealligator.infinityforreddit.post.ParsePost;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -146,7 +145,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private int maxPosition = -1;
     private SortType sortType;
     private PostFilter postFilter;
-    private ReadPostsListInterface readPostsList;
+    @Inject
+    ParsePost mParsePost;
     private FragmentPostBinding binding;
 
     public PostFragment() {
@@ -227,9 +227,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             postFilter = getArguments().getParcelable(EXTRA_FILTER);
             postFragmentId = System.currentTimeMillis() + new Random().nextInt(1000);
         }
-
-        readPostsList = new ReadPostsList(mRedditDataRoomDatabase.readPostDao(), mActivity.accountName,
-                getArguments().getBoolean(EXTRA_DISABLE_READ_POSTS, false));
 
         if (mActivity instanceof RecyclerViewContentScrollingInterface) {
             binding.recyclerViewPostFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -863,27 +860,27 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
-                    query, trendingSource, postType, sortType, postFilter, readPostsList)).get(PostViewModel.class);
+                    query, trendingSource, postType, sortType, postFilter, mParsePost)).get(PostViewModel.class);
         } else if (postType == PostPagingSource.TYPE_SUBREDDIT) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mActivity.accessToken, mActivity.accountName, mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    mPostHistorySharedPreferences, subredditName, postType, sortType, postFilter, readPostsList))
+                    mPostHistorySharedPreferences, subredditName, postType, sortType, postFilter, mParsePost))
                     .get(PostViewModel.class);
         } else if (postType == PostPagingSource.TYPE_MULTI_REDDIT) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mActivity.accessToken, mActivity.accountName, mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    mPostHistorySharedPreferences, multiRedditPath, query, postType, sortType, postFilter, readPostsList))
+                    mPostHistorySharedPreferences, multiRedditPath, query, postType, sortType, postFilter, mParsePost))
                     .get(PostViewModel.class);
         } else if (postType == PostPagingSource.TYPE_USER) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mActivity.accessToken, mActivity.accountName, mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    mPostHistorySharedPreferences, username, postType, sortType, postFilter, where, readPostsList))
+                    mPostHistorySharedPreferences, username, postType, sortType, postFilter, where, mParsePost))
                     .get(PostViewModel.class);
         } else {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mOauthRetrofit, mActivity.accessToken,
                     mActivity.accountName, mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    mPostHistorySharedPreferences, postType, sortType, postFilter, readPostsList)).get(PostViewModel.class);
+                    mPostHistorySharedPreferences, postType, sortType, postFilter, mParsePost)).get(PostViewModel.class);
         }
 
         bindPostViewModel();
@@ -894,21 +891,21 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, null, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, null, subredditName, query, trendingSource,
-                    postType, sortType, postFilter, readPostsList)).get(PostViewModel.class);
+                    postType, sortType, postFilter, mParsePost)).get(PostViewModel.class);
         } else if (postType == PostPagingSource.TYPE_SUBREDDIT) {
             mPostViewModel = new ViewModelProvider(this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, null, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, null, subredditName, postType, sortType,
-                    postFilter, readPostsList)).get(PostViewModel.class);
+                    postFilter, mParsePost)).get(PostViewModel.class);
         } else if (postType == PostPagingSource.TYPE_USER) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, null, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, null, username, postType, sortType, postFilter,
-                    where, readPostsList)).get(PostViewModel.class);
+                    where, mParsePost)).get(PostViewModel.class);
         } else {
             //Anonymous front page or multireddit
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
-                    mRetrofit, mSharedPreferences, concatenatedSubredditNames, postType, sortType, postFilter, readPostsList))
+                    mRetrofit, mSharedPreferences, concatenatedSubredditNames, postType, sortType, postFilter, mParsePost))
                     .get(PostViewModel.class);
         }
 
@@ -1355,7 +1352,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(postFragmentId,
                     new ArrayList<>(mAdapter.snapshot()), postType, subredditName,
                     concatenatedSubredditNames, username, where, multiRedditPath, query, trendingSource,
-                    postFilter, sortType, readPostsList));
+                    postFilter, sortType));
         }
     }
 

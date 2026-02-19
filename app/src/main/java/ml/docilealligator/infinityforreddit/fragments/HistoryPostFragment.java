@@ -56,6 +56,7 @@ import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragme
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
 import ml.docilealligator.infinityforreddit.post.HistoryPostPagingSource;
 import ml.docilealligator.infinityforreddit.post.HistoryPostViewModel;
+import ml.docilealligator.infinityforreddit.post.ParsePost;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
@@ -111,6 +112,8 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     ExoCreator mExoCreator;
     @Inject
     Executor mExecutor;
+    @Inject
+    ParsePost mParsePost;
     private int postType;
     private PostRecyclerViewAdapter mAdapter;
     private int maxPosition = -1;
@@ -334,11 +337,11 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         if (postType == HistoryPostPagingSource.TYPE_READ_POSTS) {
             mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
-                    mActivity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter)).get(HistoryPostViewModel.class);
+                    mActivity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost)).get(HistoryPostViewModel.class);
         } else {
             mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
-                    mActivity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter)).get(HistoryPostViewModel.class);
+                    mActivity.accountName, mSharedPreferences, HistoryPostPagingSource.TYPE_READ_POSTS, postFilter, mParsePost)).get(HistoryPostViewModel.class);
         }
 
         bindPostViewModel();
@@ -600,7 +603,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(postFragmentId,
                     new ArrayList<>(mAdapter.snapshot()), HistoryPostPagingSource.TYPE_READ_POSTS,
                     null, null, null, null,
-                    null, null, null, postFilter, null, null));
+                    null, null, null, postFilter, null));
         }
     }
 }

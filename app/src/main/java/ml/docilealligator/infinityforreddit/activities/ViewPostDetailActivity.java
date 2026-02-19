@@ -73,9 +73,7 @@ import ml.docilealligator.infinityforreddit.post.ParsePost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
-import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
@@ -122,6 +120,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Inject
+    ParsePost mParsePost;
     @State
     ArrayList<Post> posts;
     @State
@@ -160,8 +160,6 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     private boolean mIsNsfwSubreddit;
     private boolean mHideFab;
     private ActivityViewPostDetailBinding binding;
-    @Nullable
-    private ReadPostsListInterface readPostsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -642,7 +640,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     Response<String> response = call.execute();
                     if (response.isSuccessful()) {
                         String responseString = response.body();
-                        LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostsList);
+                        LinkedHashSet<Post> newPosts = mParsePost.parsePostsSync(responseString, -1, postFilter);
                         if (newPosts == null) {
                             handler.post(() -> {
                                 mLoadingMorePostsStatus = LoadingMorePostsStatus.NO_MORE_POSTS;
@@ -724,7 +722,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     Response<String> response = historyPosts.execute();
                     if (response.isSuccessful()) {
                         String responseString = response.body();
-                        LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, NullReadPostsList.getInstance());
+                        LinkedHashSet<Post> newPosts = mParsePost.parsePostsSync(responseString, -1, postFilter);
                         if (newPosts == null || newPosts.isEmpty()) {
                             handler.post(() -> {
                                 mLoadingMorePostsStatus = LoadingMorePostsStatus.NO_MORE_POSTS;
@@ -805,7 +803,6 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             this.postFilter = event.postFilter;
             this.sortType = event.sortType.getType();
             this.sortTime = event.sortType.getTime();
-            this.readPostsList = event.readPostsList;
 
             if (mSectionsPagerAdapter != null) {
                 if (mPostListPosition > 0)

@@ -20,8 +20,10 @@ import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostRepository;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -31,14 +33,20 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
  */
 
 public class ParsePost {
+    private final ReadPostRepository mReadPostRepository;
+
+    @Inject
+    public ParsePost(ReadPostRepository readPostRepository) {
+        mReadPostRepository = readPostRepository;
+    }
+
     @WorkerThread
-    public static LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+    public LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter) {
         LinkedHashSet<Post> newPosts = new LinkedHashSet<>();
         try {
             JSONObject jsonResponse = new JSONObject(response);
             JSONArray allPostsData = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
 
-            //Posts listing
             int numberOfPosts = (nPosts < 0 || nPosts > allPostsData.length()) ?
                     allPostsData.length() : nPosts;
 
@@ -59,12 +67,10 @@ public class ParsePost {
                 }
             }
 
-            if (readPostsList != null) {
-                Set<String> readPostsIds = readPostsList.getReadPostsIdsByIds(newPostsIds);
-                for (Post post: newPosts) {
-                    if (readPostsIds.contains(post.getId())) {
-                        post.markAsRead();
-                    }
+            Set<String> readPostsIds = mReadPostRepository.filterOutUnread(newPostsIds);
+            for (Post post: newPosts) {
+                if (readPostsIds.contains(post.getId())) {
+                    post.markAsRead();
                 }
             }
 

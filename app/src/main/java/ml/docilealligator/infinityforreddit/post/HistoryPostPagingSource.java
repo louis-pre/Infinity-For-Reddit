@@ -20,7 +20,6 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Call;
@@ -40,10 +39,11 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     private final String username;
     private final int postType;
     private final PostFilter postFilter;
+    private final ParsePost parsePost;
 
     public HistoryPostPagingSource(Retrofit retrofit, Executor executor, RedditDataRoomDatabase redditDataRoomDatabase,
                                    @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
-                                   String username, int postType, PostFilter postFilter) {
+                                   String username, int postType, PostFilter postFilter, ParsePost parsePost) {
         this.retrofit = retrofit;
         this.executor = executor;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -53,6 +53,7 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
         this.username = username;
         this.postType = postType;
         this.postFilter = postFilter;
+        this.parsePost = parsePost;
     }
 
     @Nullable
@@ -93,7 +94,7 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
             Response<String> response = historyPosts.execute();
             if (response.isSuccessful()) {
                 String responseString = response.body();
-                LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, NullReadPostsList.getInstance());
+                LinkedHashSet<Post> newPosts = parsePost.parsePostsSync(responseString, -1, postFilter);
                 if (newPosts == null) {
                     return new LoadResult.Error<>(new Exception("Error parsing posts"));
                 } else {

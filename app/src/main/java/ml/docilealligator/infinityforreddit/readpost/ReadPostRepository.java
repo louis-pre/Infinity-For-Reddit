@@ -34,10 +34,10 @@ public class ReadPostRepository {
 
     @Inject
     public ReadPostRepository(RedditDataRoomDatabase redditDataRoomDatabase,
-                              Readdit readdit,
-                              @Named("current_account") SharedPreferences currentAccountSharedPreferences,
-                              @Named("post_history") SharedPreferences postHistorySharedPreferences,
-                              Executor executor) {
+            Readdit readdit,
+            @Named("current_account") SharedPreferences currentAccountSharedPreferences,
+            @Named("post_history") SharedPreferences postHistorySharedPreferences,
+            Executor executor) {
         mReadPostDao = redditDataRoomDatabase.readPostDao();
         mReaddit = readdit;
         mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
@@ -51,7 +51,8 @@ public class ReadPostRepository {
 
     private int getReadPostsLimit() {
         String username = getUsername();
-        if (mPostHistorySharedPreferences.getBoolean(username + SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED, true)) {
+        if (mPostHistorySharedPreferences.getBoolean(username + SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED,
+                true)) {
             return mPostHistorySharedPreferences.getInt(username + SharedPreferencesUtils.READ_POSTS_LIMIT, 500);
         } else {
             return -1;
@@ -78,16 +79,16 @@ public class ReadPostRepository {
         mExecutor.execute(() -> {
             String username = getUsername();
             if (username != null && !username.isEmpty()) {
-                if (useReadditBackend()) {
-                    mReaddit.insertRead(postId);
-                }
                 int readPostsLimit = getReadPostsLimit();
                 int limit = Math.max(readPostsLimit, 100);
                 boolean isReadPostLimit = readPostsLimit != -1;
-                while (mReadPostDao.getReadPostsCount(username) > limit && isReadPostLimit) {
+                while (isReadPostLimit && mReadPostDao.getReadPostsCount(username) > limit) {
                     mReadPostDao.deleteOldestReadPosts(username);
                 }
                 mReadPostDao.insert(new ReadPost(username, postId));
+                if (useReadditBackend()) {
+                    mReaddit.insertRead(postId);
+                }
             }
         });
     }

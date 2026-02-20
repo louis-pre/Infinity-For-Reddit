@@ -15,8 +15,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import java.util.concurrent.TimeUnit;
+
 import ml.docilealligator.infinityforreddit.apis.ReadditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -28,9 +31,16 @@ public class Readdit {
     private final ReadditAPI mReadditAPI;
 
     @Inject
-    public Readdit(@Named("base") Retrofit retrofit) {
+    public Readdit(@Named("base") Retrofit retrofit, @Named("base") OkHttpClient okHttpClient) {
+        OkHttpClient readditClient = okHttpClient.newBuilder()
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .readTimeout(3, TimeUnit.SECONDS)
+                .writeTimeout(3, TimeUnit.SECONDS)
+                .build();
+
         mReadditAPI = retrofit.newBuilder()
                 .baseUrl(APIUtils.READDIT_API_BASE_URI)
+                .client(readditClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(ReadditAPI.class);
@@ -76,7 +86,7 @@ public class Readdit {
             Response<List<ReadditAPI.Read>> response = resultCall.execute();
             if (!response.isSuccessful()) {
                 Log.e("Readdit", "Failed call to Readdit API with code: " + response.code());
-                return readIds;
+                return null;
             }
 
             List<ReadditAPI.Read> reads = response.body();
@@ -89,7 +99,7 @@ public class Readdit {
             return readIds;
         } catch (IOException e) {
             Log.e("Readdit", "Could not call Readdit API " + e.getMessage());
-            return readIds;
+            return null;
         }
     }
 

@@ -65,7 +65,10 @@ public class ReadPostRepository {
             return Collections.emptySet();
         }
         if (useReadditBackend()) {
-            return new HashSet<>(mReaddit.getReadIds(postIds));
+            List<String> readIds = mReaddit.getReadIds(postIds);
+            if (readIds != null) {
+                return new HashSet<>(readIds);
+            }
         }
         return new HashSet<>(mReadPostDao.getReadPostsIdsByIds(postIds, username));
     }

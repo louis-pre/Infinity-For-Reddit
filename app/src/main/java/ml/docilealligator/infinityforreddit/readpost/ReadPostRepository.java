@@ -64,13 +64,14 @@ public class ReadPostRepository {
         if (username.isEmpty()) {
             return Collections.emptySet();
         }
+        Set<String> readIds = new HashSet<>(mReadPostDao.getReadPostsIdsByIds(postIds, username));
         if (useReadditBackend()) {
-            List<String> readIds = mReaddit.getReadIds(postIds);
-            if (readIds != null) {
-                return new HashSet<>(readIds);
+            List<String> readditReadIds = mReaddit.getReadIds(postIds);
+            if (readditReadIds != null) {
+                readIds.addAll(readditReadIds);
             }
         }
-        return new HashSet<>(mReadPostDao.getReadPostsIdsByIds(postIds, username));
+        return readIds;
     }
 
     public void insertAsync(String postId) {

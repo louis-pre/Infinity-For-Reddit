@@ -21,21 +21,25 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.synccit.Readdit;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 @Singleton
 public class ReadPostRepository {
     private final ReadPostDao mReadPostDao;
+    private final Readdit mReaddit;
     private final SharedPreferences mCurrentAccountSharedPreferences;
     private final SharedPreferences mPostHistorySharedPreferences;
     private final Executor mExecutor;
 
     @Inject
     public ReadPostRepository(RedditDataRoomDatabase redditDataRoomDatabase,
+                              Readdit readdit,
                               @Named("current_account") SharedPreferences currentAccountSharedPreferences,
                               @Named("post_history") SharedPreferences postHistorySharedPreferences,
                               Executor executor) {
         mReadPostDao = redditDataRoomDatabase.readPostDao();
+        mReaddit = readdit;
         mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
         mPostHistorySharedPreferences = postHistorySharedPreferences;
         mExecutor = executor;
@@ -60,6 +64,9 @@ public class ReadPostRepository {
         if (username.isEmpty()) {
             return Collections.emptySet();
         }
+        if (useReadditBackend()) {
+            return new HashSet<>(mReaddit.getReadIds(postIds));
+        }
         return new HashSet<>(mReadPostDao.getReadPostsIdsByIds(postIds, username));
     }
 
@@ -67,6 +74,9 @@ public class ReadPostRepository {
         mExecutor.execute(() -> {
             String username = getUsername();
             if (username != null && !username.isEmpty()) {
+                if (useReadditBackend()) {
+                    mReaddit.insertRead(postId);
+                }
                 int readPostsLimit = getReadPostsLimit();
                 int limit = Math.max(readPostsLimit, 100);
                 boolean isReadPostLimit = readPostsLimit != -1;
@@ -110,5 +120,10 @@ public class ReadPostRepository {
 
     public interface DeleteAllReadPostsAsyncTaskListener {
         void success();
+    }
+
+    private boolean useReadditBackend() {
+        // TODO add preference to switch between local and Readdit
+        return true;
     }
 }

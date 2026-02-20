@@ -123,7 +123,8 @@ public class ReadPostRepository {
     }
 
     private boolean useReadditBackend() {
-        // TODO add preference to switch between local and Readdit
-        return true;
+        String username = getUsername();
+        return mPostHistorySharedPreferences.getBoolean(
+                username + SharedPreferencesUtils.USE_READDIT_BACKEND, false);
     }
 }

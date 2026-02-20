@@ -81,6 +81,7 @@ public class PostHistoryFragment extends Fragment {
         boolean isAnonymous = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT);
         if (isAnonymous) {
             binding.infoTextViewPostHistoryFragment.setText(R.string.only_for_logged_in_user);
+            binding.useReadditBackendLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.markPostsAsReadLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.readPostsLimitLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.readPostsLimitTextInputLayoutPostHistoryFragment.setVisibility(View.GONE);
@@ -93,6 +94,8 @@ public class PostHistoryFragment extends Fragment {
             return binding.getRoot();
         }
 
+        binding.useReadditBackendSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
+                mActivity.accountName + SharedPreferencesUtils.USE_READDIT_BACKEND, false));
         binding.markPostsAsReadSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
                 mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false));
         binding.readPostsLimitSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
@@ -113,6 +116,11 @@ public class PostHistoryFragment extends Fragment {
                 mActivity.accountName + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE, false));
 
         updateOptions();
+
+        binding.useReadditBackendLinearLayoutPostHistoryFragment.setOnClickListener(view ->
+                binding.useReadditBackendSwitchPostHistoryFragment.performClick());
+        binding.useReadditBackendSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) ->
+                postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.USE_READDIT_BACKEND, b).apply());
 
         binding.markPostsAsReadLinearLayoutPostHistoryFragment.setOnClickListener(view ->
                 binding.markPostsAsReadSwitchPostHistoryFragment.performClick());
@@ -200,6 +208,7 @@ public class PostHistoryFragment extends Fragment {
         Drawable infoDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_info_preference_day_night_24dp, mActivity.customThemeWrapper.getPrimaryIconColor());
         binding.infoTextViewPostHistoryFragment.setCompoundDrawablesWithIntrinsicBounds(infoDrawable, null, null, null);
         int primaryTextColor = mActivity.customThemeWrapper.getPrimaryTextColor();
+        binding.useReadditBackendTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.markPostsAsReadTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.readPostsLimitTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.readPostsLimitTextInputLayoutPostHistoryFragment.setBoxStrokeColor(primaryTextColor);
